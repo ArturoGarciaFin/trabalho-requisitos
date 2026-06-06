@@ -14,16 +14,14 @@ RF10: O sistema deve fornecer um modo de alto contraste para os usuários.
 RF11: O sistema deve possuir um login de usuários.
 RF12: O sistema deve fornecer a possibilidade de inserção de problemas, compromissos, objetivos, etc via interface gráfica.
 RF13: O sistema deve registrar e armazenar ações dos usuários que podem alterar o estado do sistema.
-RF14: O sistema deve aplicar medidas de segurança nos dados inseridos.
-RF15: O sistema deve possuir um painel de administrador, para elevar ou reduzir permissões de usuários e outras funcionalidades por usuários autorizados.
-RF16: O sistema deve exibir gráficos de progresso para cada indicador.
-RF17: O sistema deve permitir que o usuário filtre gráficos de indicadores por ano.
-RF18: O sistema deve diferenciar visualmente indicadores por seu respectivo tipo.
-RF19: O sistema deve exibir o Responsável Principal e os Colaboradores para cada Ação.
-RF20: O sistema deve permitir a existência de diferentes usuários (no mínimo três camadas: SEDEF, Conselho Estadual/Secretárias, público geral).
-RF21: O sistema deve permitir o carregamento de dados por meio de planilhas.
-RF22: O sistema deve permitir a alteração de dados por meio da interface do sistema.
-RF23: O sistema deve utilizar Tokens JWT para aumentar a segurança.
+RF14: O sistema deve exibir gráficos de progresso para cada indicador.
+RF15: O sistema deve permitir que o usuário filtre gráficos de indicadores por ano.
+RF16: O sistema deve diferenciar visualmente indicadores por seu respectivo tipo.
+RF17: O sistema deve exibir o Responsável Principal e os Colaboradores para cada Ação.
+RF18: O sistema deve permitir a existência de diferentes usuários (no mínimo três camadas: SEDEF, Conselho Estadual/Secretárias, público geral).
+RF19: O sistema deve permitir o carregamento de dados por meio de planilhas.
+RF20: O sistema deve permitir a alteração de dados por meio da interface do sistema.
+
 
 Requisitos Não Funcionais
 RNF01: A interface deve ser acessível conforme os princípios do Design Universal, incluindo contraste adequado, configuração de tamanho da fonte e suporte a leitores de tela.
@@ -34,3 +32,5 @@ RNF05: O sistema deve ser bem documentado.
 RNF06: O design e a experiência devem ser minimamente semelhantes à interface do Conselho Estadual da Criança e do Adolescente.
 RNF07: O sistema deve suportar a inserção de um número arbitrário (grande) de dados.
 RNF08: O sistema deve encerrar a sessão do usuário automáticamente após 30 minutos de inatividade.
+RNF09: O sistema deve aplicar medidas de segurança nos dados inseridos.
+RNF10: O sistema deve utilizar Tokens JWT para aumentar a segurança.
