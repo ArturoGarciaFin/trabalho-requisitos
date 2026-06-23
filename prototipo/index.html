@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plano Decenal - Monitoramento de Compromissos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade Superior (RNF01, RF10) -->
+  <div class="accessibility-bar" role="navigation" aria-label="Atalhos de acessibilidade">
+    <div class="accessibility-shortcuts">
+      <span aria-hidden="true">Ir para: </span>
+      <a href="#main-content-anchor" accesskey="1">Conteúdo Principal [1]</a>
+      <a href="#nav-tabs-anchor" accesskey="2">Menu Principal [2]</a>
+    </div>
+    <div class="accessibility-controls">
+      <button class="accessibility-btn" id="btn-contrast" onclick="toggleContrast()" aria-label="Alternar modo de alto contraste">Alto Contraste ◐</button>
+      <button class="accessibility-btn" onclick="adjustFontSize(0.1)" aria-label="Aumentar tamanho da fonte">A +</button>
+      <button class="accessibility-btn" onclick="adjustFontSize(-0.1)" aria-label="Diminuir tamanho da fonte">A -</button>
+      <button class="accessibility-btn" onclick="resetFontSize()" aria-label="Resetar tamanho da fonte">Normal</button>
+    </div>
+  </div>
+
+  <!-- Alerta de Sessão Expirando (Timeout RNF08) -->
+  <div id="session-alert" class="session-alert-banner" role="alert">
+    Sua sessão expirará por inatividade em <span id="session-countdown">60</span> segundos. Mexa o mouse para continuar conectado.
+  </div>
+
+  <!-- Cabeçalho Principal (RNF06 - Estética do Conselho Estadual) -->
+  <header class="main-header" role="banner">
+    <div class="header-brand">
+      <div class="header-logo-placeholder" aria-hidden="true">CE</div>
+      <div class="header-title">
+        <h1>Plano Decenal Estadual</h1>
+        <p>Monitoramento dos Compromissos Decenais da Criança e do Adolescente</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="user-status" id="user-status-card">
+        <span class="status-dot" id="user-status-dot" style="background-color: var(--text-light)"></span>
+        <span id="user-status-name">Público Geral (Não Autenticado)</span>
+      </div>
+      <small style="opacity: 0.85;">Última atualização: <span id="header-last-update">carregando...</span></small>
+    </div>
+  </header>
+
+  <!-- Abas de Navegação Principal (RF02) -->
+  <nav class="nav-tabs-container" id="nav-tabs-anchor" aria-label="Menu principal">
+    <ul class="nav-tabs">
+      <li><button class="nav-tab-btn active" onclick="switchScreen('hierarquia', this)">Plano Decenal (Hierarquia)</button></li>
+      <li><button class="nav-tab-btn" onclick="switchScreen('filtros', this)">Pesquisa e Filtros</button></li>
+      <li><button class="nav-tab-btn" onclick="switchScreen('dashboard', this)">Dashboard de Evolução</button></li>
+      <li><button class="nav-tab-btn" id="tab-btn-gestor" onclick="switchScreen('gestor', this)">Área do Gestor</button></li>
+      <li id="tab-li-auditoria" style="display: none;"><button class="nav-tab-btn" onclick="switchScreen('auditoria', this)">Auditoria (SEDEF)</button></li>
+    </ul>
+    <button class="nav-btn-logout" id="btn-logout" onclick="logout()" aria-label="Sair do sistema">Sair do Painel ↩</button>
+  </nav>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-content" id="main-content-anchor" role="main">
+
+    <!-- ================= TELA 1: PORTAL PÚBLICO (HIERARQUIA) ================= -->
+    <section id="screen-hierarquia" class="app-screen active">
+      <div class="section-title">
+        <h2>Visualização Hierárquica do Plano</h2>
+        <p>Navegue pelos 23 Problemas Públicos vinculados aos compromissos decenais de crianças e adolescentes.</p>
+      </div>
+      
+      <div class="portal-grid">
+        <!-- Lista de 23 Problemas (Esquerda) (RF01) -->
+        <div class="problems-panel">
+          <div class="panel-header">Lista de Problemas Públicos (23)</div>
+          <div class="problems-list" id="problems-list-container" role="tablist" aria-label="Problemas Públicos">
+            <!-- Renderizado dinamicamente via JS -->
+          </div>
+        </div>
+
+        <!-- Árvore Hierárquica do Problema Selecionado (Direita) (RF02) -->
+        <div class="details-panel" id="details-panel-container">
+          <div style="text-align: center; color: var(--text-secondary); margin-top: 100px;">
+            <h3>Selecione um problema na lista ao lado para ver o detalhamento</h3>
+            <p>A hierarquia exibe: Compromisso ➔ Objetivo ➔ Linha de Ação ➔ Tarefas ➔ Indicador correspondente.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TELA 2: PESQUISA E FILTROS ================= -->
+    <section id="screen-filtros" class="app-screen">
+      <div class="section-title">
+        <h2>Pesquisa e Filtros de Monitoramento</h2>
+        <p>Filtre e busque por eixos, responsáveis, palavras-chave e status das ações.</p>
+      </div>
+
+      <!-- Card de Filtros (RF04, RF05) -->
+      <div class="filters-card">
+        <form id="search-form" onsubmit="event.preventDefault(); applySearchFilters();">
+          <div class="filters-form-grid">
+            <div class="form-group">
+              <label for="filter-query">Busca por Palavra-Chave (Título / Responsável)</label>
+              <input type="text" id="filter-query" class="form-control" placeholder="Ex: Escola, CEDEF, SES, Carlos...">
+            </div>
+            <div class="form-group">
+              <label for="filter-eixo">Eixos do Plano Decenal</label>
+              <select id="filter-eixo" class="form-control">
+                <option value="">Todos os Eixos</option>
+                <!-- Preenchido via dados.js -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="filter-status">Status da Tarefa</label>
+              <select id="filter-status" class="form-control">
+                <option value="">Todos os Status</option>
+                <option value="Não Iniciada">Não Iniciada</option>
+                <option value="Em Andamento">Em Andamento</option>
+                <option value="Concluída">Concluída</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="filter-tipo-ind">Tipo de Indicador</label>
+              <select id="filter-tipo-ind" class="form-control">
+                <option value="">Todos</option>
+                <option value="Quantitativo">Quantitativo</option>
+                <option value="Qualitativo">Qualitativo</option>
+              </select>
+            </div>
+          </div>
+          <div class="filters-actions">
+            <button type="button" class="btn-secondary" onclick="clearSearchFilters()">Limpar Filtros</button>
+            <button type="submit" class="btn-primary">Filtrar Resultados</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tabela de Resultados da Busca -->
+      <div class="results-card">
+        <div class="results-header-bar">
+          <h3>Conjunto Filtrado</h3>
+          <!-- Botões de Exportação (RF06, RNF04) -->
+          <div class="export-group">
+            <button class="btn-export" onclick="exportData('CSV')" aria-label="Exportar para CSV">Exportar CSV</button>
+            <button class="btn-export" onclick="exportData('Excel')" aria-label="Exportar para Excel">Exportar Excel (XLSX)</button>
+            <button class="btn-export" onclick="exportData('PDF')" aria-label="Exportar para PDF">Exportar PDF</button>
+          </div>
+        </div>
+        
+        <div class="results-table-container">
+          <table class="results-table" id="results-table-element">
+            <thead>
+              <tr>
+                <th>Problema / Compromisso</th>
+                <th>Objetivo</th>
+                <th>Linha de Ação (Responsável)</th>
+                <th>Tarefa</th>
+                <th>Status</th>
+                <th>Progresso</th>
+                <th>Indicadores</th>
+              </tr>
+            </thead>
+            <tbody id="results-table-body">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        <div id="results-empty-state" class="empty-state-alert" style="display: none;">
+          Nenhum registro encontrado correspondente aos filtros e palavras-chave informados. Tente ajustar os termos de busca.
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TELA 3: DASHBOARD DE EVOLUÇÃO ================= -->
+    <section id="screen-dashboard" class="app-screen">
+      <div class="section-title">
+        <h2>Dashboard Geral de Evolução</h2>
+        <p>Acompanhamento analítico consolidado do plano por período.</p>
+      </div>
+
+      <!-- Seleção de Ano (RF15) -->
+      <div class="filters-card" style="margin-bottom: 24px;">
+        <div class="form-group" style="max-width: 250px;">
+          <label for="dashboard-year">Ano de Referência do Progresso</label>
+          <select id="dashboard-year" class="form-control" onchange="renderDashboardCharts()">
+            <option value="2026" selected>2026 (Ano Atual)</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Métricas Consolidadas (RF03) -->
+      <div class="dashboard-metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">Progresso Geral do Plano</div>
+          <div class="metric-value" id="dashboard-metric-progress">0%</div>
+          <div class="metric-subtitle">Média geral ponderada das tarefas</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header">Total de Tarefas</div>
+          <div class="metric-value" id="dashboard-metric-tasks">0</div>
+          <div class="metric-subtitle">Atividades ativas catalogadas</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header">Concluídas</div>
+          <div class="metric-value" id="dashboard-metric-completed" style="color: var(--color-success)">0</div>
+          <div class="metric-subtitle">Tarefas com status Concluída</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-header">Em Andamento</div>
+          <div class="metric-value" id="dashboard-metric-pending" style="color: var(--color-warning)">0</div>
+          <div class="metric-subtitle">Tarefas ativas em execução</div>
+        </div>
+      </div>
+
+      <!-- Linhas e Colunas de Gráficos (RF14, RF16) -->
+      <div class="charts-row-grid">
+        <div class="chart-card">
+          <h3>Percentual de Tarefas por Status</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Distribuição quantitativa das atividades monitoradas.</p>
+          <div class="chart-container">
+            <canvas id="chart-status-distribution"></canvas>
+          </div>
+        </div>
+        <div class="chart-card">
+          <h3>Indicadores: Quantitativos vs Qualitativos</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Análise distributiva da tipologia dos indicadores monitorados (RF16).</p>
+          <div class="chart-container">
+            <canvas id="chart-type-distribution"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TELA 4: ACESSO RESTRITO (LOGIN) ================= -->
+    <section id="screen-login" class="app-screen">
+      <div class="login-container">
+        <div class="login-header">
+          <h3>Acesso Restrito</h3>
+          <p>Autenticação obrigatória para inserção de dados e auditoria.</p>
+        </div>
+        
+        <form class="login-form" onsubmit="event.preventDefault(); authenticateUser();">
+          <div class="form-group">
+            <label for="login-email">E-mail Corporativo</label>
+            <input type="email" id="login-email" class="form-control" required placeholder="exemplo@governo.gov.br">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Senha de Acesso</label>
+            <input type="password" id="login-password" class="form-control" required placeholder="Sua senha">
+          </div>
+          <button type="submit" class="btn-primary">Entrar no Sistema (Validação JWT)</button>
+        </form>
+
+        <div class="login-credentials-tip">
+          <strong>Credenciais Acadêmicas para Teste:</strong>
+          <ul style="margin-left: 20px; margin-top: 6px;">
+            <li><strong>Perfil SEDEF (Admin):</strong> email: <code>sedef@governo.gov.br</code> | senha: <code>admin</code></li>
+            <li><strong>Perfil Conselho:</strong> email: <code>conselho@conselho.gov.br</code> | senha: <code>conselho</code></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TELA 5: ÁREA DO GESTOR (CADASTRO / UPLOAD) ================= -->
+    <section id="screen-gestor" class="app-screen">
+      <div class="section-title">
+        <h2>Área de Operações e Gestão de Dados</h2>
+        <p>Atualização de progresso de tarefas, cadastro hierárquico manual ou importação em lote.</p>
+      </div>
+
+      <div class="manager-layout">
+        <!-- Cadastros e Edição (Esquerda) (RF12, RF20, Regras de Negócio - Hierarquia) -->
+        <div class="manager-card">
+          <h3>Inserção Manual de Dados</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Cadastre problemas, compromissos, objetivos, tarefas e indicadores no sistema.</p>
+          
+          <form id="data-insert-form" onsubmit="event.preventDefault(); submitManualData();">
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label for="insert-level">Nível da Hierarquia a Inserir</label>
+              <select id="insert-level" class="form-control" onchange="adjustInsertFormFields()" required>
+                <option value="problema">1. Novo Problema Público e Compromisso</option>
+                <option value="objetivo">2. Novo Objetivo (vinculado a um Compromisso)</option>
+                <option value="linha">3. Nova Linha de Ação (vinculada a um Objetivo)</option>
+                <option value="tarefa">4. Nova Tarefa (vinculada a uma Linha de Ação)</option>
+                <option value="indicador">5. Novo Indicador (vinculado a uma Tarefa)</option>
+              </select>
+            </div>
+
+            <!-- Campos Dinâmicos controlados por JS -->
+            <div id="dynamic-insert-fields">
+              <!-- Renderizado via JS -->
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 20px;">Salvar Registro no Sistema</button>
+          </form>
+        </div>
+
+        <!-- Importação por Planilha (Direita) (RF19, Regras de Negócio) -->
+        <div class="manager-card">
+          <h3>Importação em Lote (CSV/Planilha)</h3>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Envie planilhas CSV para atualização rápida de tarefas e indicadores. A importação obedece a regras rígidas de hierarquia.</p>
+          
+          <div class="upload-drag-area" id="drag-drop-zone" onclick="document.getElementById('csv-file-input').click()">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Arraste e solte o arquivo CSV aqui</div>
+            <div class="upload-subtext">ou clique para navegar nos arquivos do seu computador</div>
+            <input type="file" id="csv-file-input" style="display: none;" accept=".csv" onchange="handleFileSelect(this)">
+          </div>
+
+          <div id="upload-feedback" class="upload-feedback-box">
+            <!-- Retorno dinâmico do processamento -->
+          </div>
+
+          <div class="login-credentials-tip" style="margin-top: 16px;">
+            <strong>Como testar a Importação:</strong>
+            <p style="margin-top: 4px;">Baixe a planilha modelo de teste do sistema ou envie um arquivo contendo o cabeçalho:</p>
+            <code>id_tarefa;descricao;status;percentual;responsavel</code>
+            <p style="margin-top: 8px;"><button class="btn-export" onclick="downloadSampleCSV()" style="padding: 4px 8px; font-size: 0.75rem;">Baixar Modelo de Planilha de Teste (.CSV)</button></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TELA 6: AUDITORIA (SEDEF) ================= -->
+    <section id="screen-auditoria" class="app-screen">
+      <div class="section-title">
+        <h2>Painel de Controle e Auditoria SEDEF</h2>
+        <p>Acesso exclusivo do administrador do sistema para gestão de privilégios e trilha de auditoria.</p>
+      </div>
+
+      <!-- Gerenciamento de Permissões (RF09) -->
+      <div class="audit-logs-card" style="margin-bottom: 32px;">
+        <h3>Controle de Usuários e Permissões (RF09)</h3>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Eleve ou reduza o nível de acesso das contas registradas.</p>
+        
+        <div class="results-table-container">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Nível de Acesso Atual</th>
+                <th>Alterar Acesso</th>
+              </tr>
+            </thead>
+            <tbody id="user-permissions-tbody">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Histórico de Auditoria Imutável (RF13, Regras de Negócio) -->
+      <div class="audit-logs-card">
+        <h3>Trilha de Auditoria Imutável (RF13)</h3>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px;">Registro permanente de todas as operações administrativas e de modificação de status efetuadas.</p>
+        
+        <div class="results-table-container">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Usuário</th>
+                <th>Operação</th>
+                <th>Data e Hora</th>
+                <th>Detalhes da Ação</th>
+              </tr>
+            </thead>
+            <tbody id="audit-logs-tbody">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer style="background-color: #0f172a; color: #94a3b8; text-align: center; padding: 24px 5%; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: auto;" role="contentinfo">
+    <p>© 2026 Monitoramento do Plano Decenal. Protótipo para Engenharia de Requisitos.</p>
+    <small style="display: block; margin-top: 4px;">Último salvamento automático de dados: <span id="footer-last-update">carregando...</span></small>
+  </footer>
+
+  <!-- ================= MODAL: TIMELINE HISTÓRICO DE TAREFAS (RF08) ================= -->
+  <div class="modal-overlay" id="modal-history">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-history-title">
+      <button class="modal-close-btn" onclick="closeHistoryModal()" aria-label="Fechar modal">×</button>
+      <h3 class="modal-title" id="modal-history-title">Histórico de Alterações</h3>
+      <h4 id="modal-history-task-name" style="margin-bottom: 16px; color: var(--primary-color);">Tarefa</h4>
+      <div class="history-timeline" id="modal-history-timeline">
+        <!-- Renderizado dinamicamente -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: FEEDBACK DE EXPORTAÇÃO (RF06) ================= -->
+  <div class="modal-overlay" id="modal-export">
+    <div class="modal-content" style="text-align: center; max-width: 400px;" role="dialog" aria-modal="true" aria-labelledby="modal-export-title">
+      <button class="modal-close-btn" onclick="closeExportModal()" aria-label="Fechar modal">×</button>
+      <h3 class="modal-title" id="modal-export-title">Exportação Concluída!</h3>
+      <p style="margin-bottom: 20px;">O arquivo contendo a extração dos dados filtrados foi gerado com sucesso respeitando a integridade do monitoramento.</p>
+      <div style="font-size: 0.85rem; padding: 12px; background-color: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: 20px; font-weight: 500;">
+        <span id="export-filename">relatorio.csv</span>
+      </div>
+      <button class="btn-primary" onclick="closeExportModal()" style="width: 100%;">Fechar Janela</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="dados.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
